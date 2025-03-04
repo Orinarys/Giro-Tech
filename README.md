@@ -217,4 +217,3 @@ python -m unittest tests/test_app.py
 ## 📝 Considerações Finais
 
 Este projeto foi desenvolvido como parte do desafio técnico da **Giro.Tech**, com o objetivo de demonstrar habilidades em desenvolvimento backend, manipulação de banco de dados e testes automatizados.
-```
