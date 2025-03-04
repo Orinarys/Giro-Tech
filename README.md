@@ -1,6 +1,6 @@
 # 🚀 GiroTech - Desafio Técnico
 
-Bem-vindo ao desafio técnico da **Giro.Tech**! Este repositório contém a solução para o desafio de **Backend**.
+Este repositório contém a solução para o desafio de **Backend**.
 
 ## 🚀 Como Executar o Projeto
 
