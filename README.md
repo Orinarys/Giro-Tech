@@ -1,148 +1,220 @@
-# Giro.Tech - Desafio Técnico Backend
+# 🚀 GiroTech - Desafio Técnico
 
-Este repositório contém a solução para o desafio técnico proposto pela **Giro.Tech**, que consiste no desenvolvimento de uma **API RESTful** para gerenciar moedas, taxas de câmbio, investidores e investimentos. A aplicação foi desenvolvida utilizando **Flask** e **SQLAlchemy**, com um banco de dados **SQLite** para armazenamento dos dados.
-
-## 🌐 Introdução
-O objetivo deste desafio é demonstrar habilidades no desenvolvimento de **APIs RESTful**, com foco na manipulação eficiente e estruturada de dados. A aplicação implementa operações **CRUD (Create, Read, Update, Delete)** para as entidades descritas no modelo de banco de dados, incluindo regras de negócio específicas e testes automatizados.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-- **Flask**: Framework web para Python
-- **SQLAlchemy**: ORM para interação com banco de dados
-- **SQLite**: Banco de dados leve e embutido
-- **unittest**: Framework para testes automatizados
-
----
-
-## 📂 Modelo de Banco de Dados
-A aplicação utiliza um banco de dados relacional composto pelas seguintes tabelas:
-
-### **Currency (Moeda)**
-- `id`: Identificador único
-- `name`: Nome da moeda
-- `type`: Tipo da moeda (ex: USD, EUR)
-
-### **ExchangeRate (Taxa de Câmbio)**
-- `id`: Identificador único
-- `date`: Data da taxa
-- `daily_variation`: Variação diária
-- `daily_rate`: Taxa diária
-- `currency_id`: Chave estrangeira para **Currency**
-
-### **Investor (Investidor)**
-- `id`: Identificador único
-- `name`: Nome do investidor
-- `email`: E-mail do investidor (**único**)
-
-### **InvestmentHistory (Histórico de Investimento)**
-- `id`: Identificador único
-- `initial_amount`: Valor inicial
-- `months`: Período do investimento (meses)
-- `interest_rate`: Taxa de juros
-- `final_amount`: Valor final
-- `currency_id`: Chave estrangeira para **Currency**
-- `investor_id`: Chave estrangeira para **Investor**
-
----
-
-## 🔄 Funcionalidades Implementadas
-
-### 👉 **1. Inserção de Dados**
-- **POST /currencies**: Cadastra uma nova moeda
-- **POST /exchange-rates**: Cadastra uma nova taxa de câmbio
-- **POST /investors**: Cadastra um novo investidor (**e-mail único**)
-- **POST /investments**: Cadastra um novo investimento
-
-### 👈 **2. Consulta de Dados**
-- **GET /currencies**: Lista todas as moedas cadastradas
-- **GET /exchange-rates/recent**: Retorna taxas de câmbio dos últimos 7 dias
-
-### ✏️ **3. Atualização de Dados**
-- **PUT /exchange-rates/{id}**: Atualiza uma taxa de câmbio
-
-### ❌ **4. Remoção de Registros**
-- **DELETE /exchange-rates/old**: Remove taxas de câmbio com mais de 1 ano
-- **DELETE /investors/{id}**: Remove um investidor e seus investimentos associados
-
----
+Bem-vindo ao desafio técnico da **Giro.Tech**! Este repositório contém a solução para o desafio de **Backend**.
 
 ## 🚀 Como Executar o Projeto
 
-### 🛠️ **Pré-requisitos**
-- **Python 3.8 ou superior**
+### Pré-requisitos
+- **Python 3.x**
 - **Pip** (gerenciador de pacotes do Python)
 
-### 📖 **Passos para Configuração**
+### Instalação
+
+1. **Clone o repositório:**
+    ```bash
+    git clone https://github.com/seu-usuario/girotech-backend.git
+    cd girotech-backend
+    ```
+
+2. **Crie um ambiente virtual e ative-o:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # No Windows use venv\Scripts\activate
+    ```
+
+3. **Instale as dependências:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### Executando a Aplicação
+
+1. **Inicie o servidor Flask:**
+    ```bash
+    python run.py
+    ```
+
+A API estará disponível em: `http://127.0.0.1:5000/`.
+
+### Executando os Testes
+
+Para rodar os testes unitários e de integração, execute:
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/giro-tech.git
-cd giro-tech
-
-# Crie e ative um ambiente virtual
-python -m venv .venv
-source .venv/bin/activate  # Para macOS/Linux
-.venv\Scripts\activate    # Para Windows
-
-# Instale as dependências
-pip install flask flask-sqlalchemy
-
-# Execute a aplicação
-python run.py
+python -m unittest tests/test_app.py
 ```
-A API estará disponível em **http://127.0.0.1:5000/**.
 
----
+## 📚 Documentação da API
 
-## 🎯 Testes Automatizados
+### Endpoints
 
-A API conta com testes unitários para verificar o funcionamento correto das rotas. Para executar os testes:
+#### **Moedas**
+
+- **POST /moedas**: Cadastra uma nova moeda.
+    - **Exemplo de Entrada:**
+        ```json
+        {
+          "nome": "Dólar Americano",
+          "tipo": "USD"
+        }
+        ```
+    - **Exemplo de Saída:**
+        ```json
+        {
+          "id": 1,
+          "nome": "Dólar Americano",
+          "tipo": "USD"
+        }
+        ```
+
+- **GET /moedas**: Lista todas as moedas cadastradas.
+    - **Exemplo de Saída:**
+        ```json
+        [
+          {
+            "id": 1,
+            "nome": "Dólar Americano",
+            "tipo": "USD"
+          },
+          {
+            "id": 2,
+            "nome": "Euro",
+            "tipo": "EUR"
+          }
+        ]
+        ```
+
+#### **Taxas de Câmbio**
+
+- **POST /taxas-cambio**: Cadastra uma nova taxa de câmbio.
+    - **Exemplo de Entrada:**
+        ```json
+        {
+          "moeda_id": 1,
+          "data": "2025-02-01",
+          "variacao_diaria": 0.5,
+          "taxa_diaria": 5.25
+        }
+        ```
+    - **Exemplo de Saída:**
+        ```json
+        {
+          "id": 1,
+          "data": "2025-02-01",
+          "variacao_diaria": 0.5,
+          "taxa_diaria": 5.25,
+          "moeda_id": 1
+        }
+        ```
+
+- **GET /taxas-cambio/recentes**: Retorna as taxas de câmbio dos últimos 7 dias.
+    - **Exemplo de Saída:**
+        ```json
+        [
+          {
+            "id": 1,
+            "data": "2025-02-01",
+            "variacao_diaria": 0.5,
+            "taxa_diaria": 5.25,
+            "nome_moeda": "Dólar Americano",
+            "tipo_moeda": "USD"
+          }
+        ]
+        ```
+
+- **PUT /taxas-cambio/{id}**: Atualiza uma taxa de câmbio específica.
+    - **Exemplo de Entrada:**
+        ```json
+        {
+          "variacao_diaria": 0.8,
+          "taxa_diaria": 5.30
+        }
+        ```
+    - **Exemplo de Saída:**
+        ```json
+        {
+          "id": 1,
+          "data": "2025-02-01",
+          "variacao_diaria": 0.8,
+          "taxa_diaria": 5.30
+        }
+        ```
+
+- **DELETE /taxas-cambio/antigas**: Remove taxas de câmbio com mais de 365 dias.
+    - **Exemplo de Saída:**
+        ```json
+        {
+          "mensagem": "Taxas de câmbio antigas excluídas"
+        }
+        ```
+
+#### **Investidores**
+
+- **POST /investidores**: Cadastra um novo investidor.
+    - **Exemplo de Entrada:**
+        ```json
+        {
+          "nome": "João Silva",
+          "email": "joao@email.com"
+        }
+        ```
+    - **Exemplo de Saída:**
+        ```json
+        {
+          "id": 1,
+          "nome": "João Silva",
+          "email": "joao@email.com"
+        }
+        ```
+
+- **DELETE /investidor/{id}**: Deleta um investidor e seus investimentos associados.
+    - **Exemplo de Saída:**
+        ```json
+        {
+          "mensagem": "Investidor e investimentos associados excluídos"
+        }
+        ```
+
+#### **Investimentos**
+
+- **POST /investimentos**: Cadastra um novo investimento.
+    - **Exemplo de Entrada:**
+        ```json
+        {
+          "valor_inicial": 10000,
+          "meses": 12,
+          "taxa_juros": 5.5,
+          "moeda_id": 1,
+          "investidor_id": 1
+        }
+        ```
+    - **Exemplo de Saída:**
+        ```json
+        {
+          "id": 1,
+          "valor_inicial": 10000,
+          "meses": 12,
+          "taxa_juros": 5.5,
+          "valor_final": 10550,
+          "moeda_id": 1,
+          "investidor_id": 1
+        }
+        ```
+
+## 🧪 Testes
+
+O projeto inclui testes unitários e de integração para garantir o funcionamento correto dos endpoints e da lógica de negócios. Os testes cobrem:
+
+- Inserção de dados (moedas, taxas de câmbio, investidores, investimentos).
+- Consultas (listagem de moedas, taxas de câmbio recentes).
+- Atualização de dados (taxas de câmbio).
+- Remoção de registros (taxas de câmbio antigas, investidores).
+
+Para executar os testes, utilize o comando:
 ```bash
-python -m unittest test_app.py
-```
-**Saída esperada:**
-```bash
-.......
-----------------------------------------------------------------------
-Ran 7 tests in 0.456s
-
-OK
+python -m unittest tests/test_app.py
 ```
 
----
+## 📝 Considerações Finais
 
-## 📚 Estrutura do Projeto
+Este projeto foi desenvolvido como parte do desafio técnico da **Giro.Tech**, com o objetivo de demonstrar habilidades em desenvolvimento backend, manipulação de banco de dados e testes automatizados.
 ```
-giro-tech/
-│
-├── app/
-│   ├── __init__.py         # Inicialização da aplicação Flask
-│   ├── config.py           # Configurações da aplicação
-│   ├── models.py           # Modelos de dados
-│   └── routes.py           # Rotas da API
-├── run.py                  # Script para rodar a aplicação
-├── test_app.py             # Testes automatizados
-├── finance.db              # Banco de dados SQLite (gerado automaticamente)
-├── README.md               # Documentação do projeto
-└── .venv/                  # Ambiente virtual (opcional)
-```
-
----
-
-## 🤝 Contribuição
-Contribuições são bem-vindas! Para sugerir melhorias:
-1. **Fork** o repositório
-2. Crie uma **branch** para sua funcionalidade: `git checkout -b minha-melhoria`
-3. **Commit** suas alterações: `git commit -m "Adiciona nova funcionalidade"`
-4. **Push** para o repositório remoto: `git push origin minha-melhoria`
-5. Abra um **Pull Request**
-
----
-
-## 📢 Contato
-- **Nome:** Kevin Andrew
-- **E-mail:** kevin.andrew08rs@gmail.com
-- **GitHub:** [Orinarys](https://github.com/Orinarys)
-
-👉 **Feito com ❤️ por Kevin Andrew**
-
