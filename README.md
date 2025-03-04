@@ -1,196 +1,383 @@
-# **Projeto Giro-Tech**
+Giro.Tech - Desafio Técnico Backend
+Este repositório contém a solução para o desafio técnico proposto pela Giro.Tech, que consiste em desenvolver uma API RESTful para gerenciar moedas, taxas de câmbio, investidores e investimentos. A aplicação foi desenvolvida utilizando Flask e SQLAlchemy, com um banco de dados SQLite para armazenamento dos dados.
 
-Este projeto é uma API Flask para gerenciar moedas, taxas de câmbio, investidores e investimentos. Ele utiliza SQLAlchemy para interagir com um banco de dados SQLite.
+Introdução
+O objetivo deste desafio é demonstrar habilidades no desenvolvimento de APIs RESTful, com foco na manipulação eficiente e estruturada de dados. A aplicação implementa operações CRUD (Create, Read, Update, Delete) para as entidades descritas no modelo de banco de dados, além de incluir regras de negócio específicas e testes automatizados.
 
----
+Modelo de Banco de Dados
+O banco de dados relacional é composto pelas seguintes tabelas:
 
-## **Funcionalidades**
+Currency (Moeda):
 
-1. **Moedas**:
-   - Cadastrar uma nova moeda.
-   - Listar todas as moedas cadastradas.
+id: Identificador único da moeda.
 
-2. **Taxas de Câmbio**:
-   - Cadastrar uma nova taxa de câmbio.
-   - Listar taxas de câmbio recentes (últimos 7 dias).
-   - Atualizar uma taxa de câmbio existente.
-   - Excluir taxas de câmbio antigas (mais de 1 ano).
+name: Nome da moeda.
 
-3. **Investidores**:
-   - Cadastrar um novo investidor.
-   - Excluir um investidor e seus investimentos associados.
+type: Tipo da moeda (ex: USD, EUR).
 
-4. **Investimentos**:
-   - Cadastrar um novo investimento.
-   - Calcular o valor final do investimento com base na taxa de juros e no período.
+ExchangeRate (Taxa de Câmbio):
 
----
+id: Identificador único da taxa de câmbio.
 
-## **Tecnologias Utilizadas**
+date: Data da taxa de câmbio.
 
-- **Flask**: Framework web para Python.
-- **SQLAlchemy**: ORM para interagir com o banco de dados.
-- **SQLite**: Banco de dados leve e embutido.
+daily_variation: Variação diária da taxa.
 
----
+daily_rate: Taxa diária.
 
-## **Como Executar o Projeto**
+currency_id: Chave estrangeira para a tabela Currency.
 
-### **Pré-requisitos**
+Investor (Investidor):
 
-- Python 3.8 ou superior.
-- Pip (gerenciador de pacotes do Python).
+id: Identificador único do investidor.
 
-### **Passos para Configuração**
+name: Nome do investidor.
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/giro-tech.git
-   cd giro-tech
-   ```
+email: E-mail do investidor (único).
 
-2. Crie um ambiente virtual (opcional, mas recomendado):
-   ```bash
-   python -m venv .venv
-   ```
+InvestmentHistory (Histórico de Investimento):
 
-3. Ative o ambiente virtual:
-   - No Windows:
-     ```bash
-     .venv\Scripts\activate
-     ```
-   - No macOS/Linux:
-     ```bash
-     source .venv/bin/activate
-     ```
+id: Identificador único do investimento.
 
-4. Instale as dependências:
-   ```bash
-   pip install flask flask-sqlalchemy
-   ```
+initial_amount: Valor inicial do investimento.
 
-5. Execute a aplicação:
-   ```bash
-   python app.py
-   ```
+months: Período do investimento em meses.
 
-   O servidor Flask será iniciado em `http://127.0.0.1:5000/`.
+interest_rate: Taxa de juros aplicada.
 
----
+final_amount: Valor final do investimento.
 
-## **Testando a API**
+currency_id: Chave estrangeira para a tabela Currency.
 
-Você pode testar as rotas da API usando ferramentas como **Postman** ou **cURL**.
+investor_id: Chave estrangeira para a tabela Investor.
 
-### **Exemplos de Requisições**
+Funcionalidades Implementadas
+1. Inserção de Dados
+POST /currencies: Cadastra uma nova moeda.
 
-1. **Cadastrar uma nova moeda**:
-   ```bash
-   curl -X POST http://localhost:5000/moedas -H "Content-Type: application/json" -d '{"nome": "Dólar Americano", "tipo": "USD"}'
-   ```
+Exemplo de entrada:
 
-2. **Listar todas as moedas**:
-   ```bash
-   curl http://localhost:5000/moedas
-   ```
+json
+Copy
+{
+  "name": "Dólar Americano",
+  "type": "USD"
+}
+Exemplo de saída:
 
-3. **Cadastrar uma nova taxa de câmbio**:
-   ```bash
-   curl -X POST http://localhost:5000/taxas-cambio -H "Content-Type: application/json" -d '{"moeda_id": 1, "data": "2023-10-01", "variacao_diaria": 0.5, "taxa_diaria": 5.25}'
-   ```
+json
+Copy
+{
+  "id": 1,
+  "name": "Dólar Americano",
+  "type": "USD"
+}
+POST /exchange-rates: Cadastra uma nova taxa de câmbio.
 
-4. **Listar taxas de câmbio recentes**:
-   ```bash
-   curl http://localhost:5000/taxas-cambio/recentes
-   ```
+Exemplo de entrada:
 
-5. **Cadastrar um novo investidor**:
-   ```bash
-   curl -X POST http://localhost:5000/investidores -H "Content-Type: application/json" -d '{"nome": "João Silva", "email": "joao@email.com"}'
-   ```
+json
+Copy
+{
+  "date": "2025-02-01",
+  "daily_variation": 0.5,
+  "daily_rate": 5.25,
+  "currency_id": 1
+}
+Exemplo de saída:
 
-6. **Cadastrar um novo investimento**:
-   ```bash
-   curl -X POST http://localhost:5000/investimentos -H "Content-Type: application/json" -d '{"valor_inicial": 10000, "meses": 12, "taxa_juros": 5.5, "moeda_id": 1, "investidor_id": 1}'
-   ```
+json
+Copy
+{
+  "id": 1,
+  "date": "2025-02-01",
+  "daily_variation": 0.5,
+  "daily_rate": 5.25,
+  "currency_id": 1
+}
+POST /investors: Cadastra um novo investidor.
 
----
+Regra: Não é possível cadastrar um investidor com um e-mail já existente.
 
-## **Executando os Testes**
+Exemplo de entrada:
 
-O projeto inclui testes automatizados para garantir o funcionamento correto das rotas da API. Para executar os testes:
+json
+Copy
+{
+  "name": "João Silva",
+  "email": "joao@email.com"
+}
+Exemplo de saída:
 
-1. Navegue até o diretório do projeto:
-   ```bash
-   cd giro-tech
-   ```
+json
+Copy
+{
+  "id": 1,
+  "name": "João Silva",
+  "email": "joao@email.com"
+}
+POST /investments: Cadastra um novo investimento.
 
-2. Execute os testes:
-   ```bash
-   python -m unittest test_app.py
-   ```
+Exemplo de entrada:
 
-   Você verá uma saída como esta se todos os testes passarem:
-   ```
-   .......
-   ----------------------------------------------------------------------
-   Ran 7 tests in 0.456s
+json
+Copy
+{
+  "initial_amount": 10000,
+  "months": 12,
+  "interest_rate": 5.5,
+  "currency_id": 1,
+  "investor_id": 1
+}
+Exemplo de saída:
 
-   OK
-   ```
+json
+Copy
+{
+  "id": 1,
+  "initial_amount": 10000,
+  "months": 12,
+  "interest_rate": 5.5,
+  "final_amount": 10550,
+  "currency_id": 1,
+  "investor_id": 1
+}
+2. Consultas
+GET /currencies: Lista todas as moedas cadastradas.
 
----
+Exemplo de saída:
 
-## **Estrutura do Projeto**
+json
+Copy
+[
+  {
+    "id": 1,
+    "name": "Dólar Americano",
+    "type": "USD"
+  },
+  {
+    "id": 2,
+    "name": "Euro",
+    "type": "EUR"
+  }
+]
+GET /exchange-rates/recent: Retorna as taxas de câmbio dos últimos 7 dias.
 
-```
+Exemplo de saída:
+
+json
+Copy
+[
+  {
+    "id": 1,
+    "date": "2025-02-01",
+    "daily_variation": 0.5,
+    "daily_rate": 5.25,
+    "currency_name": "Dólar Americano",
+    "currency_type": "USD"
+  }
+]
+3. Atualização de Dados
+PUT /exchange-rates/{id}: Atualiza a taxa de câmbio de uma moeda específica.
+
+Exemplo de entrada:
+
+json
+Copy
+{
+  "daily_variation": 0.8,
+  "daily_rate": 5.30
+}
+Exemplo de saída:
+
+json
+Copy
+{
+  "id": 1,
+  "date": "2025-02-01",
+  "daily_variation": 0.8,
+  "daily_rate": 5.30
+}
+4. Remoção de Registros
+DELETE /exchange-rates/old: Remove taxas de câmbio com mais de 1 ano.
+
+Exemplo de saída:
+
+json
+Copy
+{
+  "mensagem": "Taxas de câmbio antigas excluídas"
+}
+DELETE /investor/{id}: Remove um investidor e seus investimentos associados.
+
+Exemplo de saída:
+
+json
+Copy
+{
+  "mensagem": "Investidor e investimentos associados excluídos"
+}
+Como Utilizar o Sistema
+Aqui estão os passos para utilizar o sistema e incluir informações:
+
+1. Cadastrar uma Moeda
+Faça uma requisição POST para /currencies com os dados da moeda:
+
+bash
+Copy
+curl -X POST http://localhost:5000/currencies -H "Content-Type: application/json" -d '{"name": "Dólar Americano", "type": "USD"}'
+2. Cadastrar uma Taxa de Câmbio
+Faça uma requisição POST para /exchange-rates com os dados da taxa de câmbio:
+
+bash
+Copy
+curl -X POST http://localhost:5000/exchange-rates -H "Content-Type: application/json" -d '{"date": "2025-02-01", "daily_variation": 0.5, "daily_rate": 5.25, "currency_id": 1}'
+3. Cadastrar um Investidor
+Faça uma requisição POST para /investors com os dados do investidor:
+
+bash
+Copy
+curl -X POST http://localhost:5000/investors -H "Content-Type: application/json" -d '{"name": "João Silva", "email": "joao@email.com"}'
+4. Cadastrar um Investimento
+Faça uma requisição POST para /investments com os dados do investimento:
+
+bash
+Copy
+curl -X POST http://localhost:5000/investments -H "Content-Type: application/json" -d '{"initial_amount": 10000, "months": 12, "interest_rate": 5.5, "currency_id": 1, "investor_id": 1}'
+5. Listar Moedas
+Faça uma requisição GET para /currencies:
+
+bash
+Copy
+curl http://localhost:5000/currencies
+6. Listar Taxas de Câmbio Recentes
+Faça uma requisição GET para /exchange-rates/recent:
+
+bash
+Copy
+curl http://localhost:5000/exchange-rates/recent
+7. Atualizar uma Taxa de Câmbio
+Faça uma requisição PUT para /exchange-rates/{id} com os novos dados:
+
+bash
+Copy
+curl -X PUT http://localhost:5000/exchange-rates/1 -H "Content-Type: application/json" -d '{"daily_variation": 0.8, "daily_rate": 5.30}'
+8. Excluir Taxas de Câmbio Antigas
+Faça uma requisição DELETE para /exchange-rates/old:
+
+bash
+Copy
+curl -X DELETE http://localhost:5000/exchange-rates/old
+9. Excluir um Investidor
+Faça uma requisição DELETE para /investor/{id}:
+
+bash
+Copy
+curl -X DELETE http://localhost:5000/investor/1
+Tecnologias Utilizadas
+Flask: Framework web para Python.
+
+SQLAlchemy: ORM para interagir com o banco de dados.
+
+SQLite: Banco de dados leve e embutido.
+
+unittest: Framework para testes automatizados.
+
+Como Executar o Projeto
+Pré-requisitos
+Python 3.8 ou superior.
+
+Pip (gerenciador de pacotes do Python).
+
+Passos para Configuração
+Clone o repositório:
+
+bash
+Copy
+git clone https://github.com/seu-usuario/giro-tech.git
+cd giro-tech
+Crie um ambiente virtual:
+
+bash
+Copy
+python -m venv .venv
+Ative o ambiente virtual:
+
+No Windows:
+
+bash
+Copy
+.venv\Scripts\activate
+No macOS/Linux:
+
+bash
+Copy
+source .venv/bin/activate
+Instale as dependências:
+
+bash
+Copy
+pip install flask flask-sqlalchemy
+Execute a aplicação:
+
+bash
+Copy
+python run.py
+A API estará disponível em http://127.0.0.1:5000/.
+
+Testes Automatizados
+O projeto inclui testes unitários para garantir o funcionamento correto das rotas da API. Para executar os testes:
+
+Navegue até o diretório do projeto:
+
+bash
+Copy
+cd giro-tech
+Execute os testes:
+
+bash
+Copy
+python -m unittest test_app.py
+Saída esperada:
+
+Copy
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.456s
+
+OK
+Estrutura do Projeto
+Copy
 giro-tech/
 │
-├── app.py                  # Arquivo principal da aplicação
+├── app/
+│   ├── __init__.py         # Inicialização da aplicação Flask
+│   ├── config.py           # Configurações da aplicação
+│   ├── models.py           # Modelos de dados (Currency, ExchangeRate, Investor, InvestmentHistory)
+│   └── routes.py           # Rotas da API
+├── run.py                  # Script para rodar a aplicação
 ├── test_app.py             # Testes automatizados
 ├── finance.db              # Banco de dados SQLite (criado automaticamente)
 ├── README.md               # Documentação do projeto
 └── .venv/                  # Ambiente virtual (opcional)
-```
+Contribuição
+Contribuições são bem-vindas! Siga os passos abaixo:
 
----
+Faça um fork do repositório.
 
-## **Contribuição**
+Crie uma branch para sua feature (git checkout -b feature/nova-feature).
 
-Se você deseja contribuir para este projeto, siga os passos abaixo:
+Commit suas alterações (git commit -m 'Adiciona nova feature').
 
-1. Faça um fork do repositório.
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`).
-3. Commit suas alterações (`git commit -m 'Adiciona nova feature'`).
-4. Push para a branch (`git push origin feature/nova-feature`).
-5. Abra um Pull Request.
+Push para a branch (git push origin feature/nova-feature).
 
----
+Abra um Pull Request.
 
-## **Licença**
-
-Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-
-## **Contato**
-
+Contato
 Se tiver dúvidas ou sugestões, entre em contato:
 
-- **Nome**: Kevin
-- **E-mail**: kevin@email.com
-- **GitHub**: [seu-usuario](https://github.com/seu-usuario)
+Nome: Kevin
 
----
+E-mail: kevin@email.com
 
-**Divirta-se usando o Giro-Tech!** 🚀
-
----
-
-### **Observações**
-
-- Substitua `seu-usuario` pelo seu nome de usuário do GitHub.
-- Adicione um arquivo `LICENSE` se desejar licenciar o projeto.
-- Personalize as informações de contato conforme necessário.
-
-Se precisar de mais ajustes ou tiver dúvidas, é só perguntar! 😊
+GitHub: seu-usuario

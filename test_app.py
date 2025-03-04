@@ -1,28 +1,31 @@
 import unittest
 from flask import Flask
-from app import app, db, Moeda, TaxaCambio, Investidor, HistoricoInvestimento
+from app import create_app, db
+from app.models import Moeda, TaxaCambio, Investidor, HistoricoInvestimento, db
 from datetime import datetime, timedelta
 
 class TestApp(unittest.TestCase):
 
     def setUp(self):
-        # Configuração do ambiente de teste
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        app.config['TESTING'] = True
-        self.app = app.test_client()
-        with app.app_context():
-            db.create_all()
+            # Configuração do ambiente de teste
+            self.app = create_app()
+            self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  
+            self.app.config['TESTING'] = True 
+            self.client = self.app.test_client() 
+            
+            with self.app.app_context(): 
+                db.create_all()
 
     def tearDown(self):
         # Limpeza após cada teste
-        with app.app_context():
+        with self.app.app_context():
             db.session.remove()
             db.drop_all()
 
     # Testes para Inserção de Dados
     def test_criar_moeda(self):
         # Teste para a rota POST /moedas
-        response = self.app.post('/moedas', json={
+        response = self.client.post('/moedas', json={
             "nome": "Dólar Americano",
             "tipo": "USD"
         })
@@ -33,13 +36,13 @@ class TestApp(unittest.TestCase):
 
     def test_criar_taxa_cambio(self):
         # Cria uma moeda para associar à taxa de câmbio
-        with app.app_context():
+        with self.app.app_context():
             moeda = Moeda(nome="Dólar Americano", tipo="USD")
             db.session.add(moeda)
             db.session.commit()
 
             # Teste para a rota POST /taxas-cambio
-            response = self.app.post('/taxas-cambio', json={
+            response = self.client.post('/taxas-cambio', json={
                 "moeda_id": moeda.id,
                 "data": "2025-02-01",
                 "variacao_diaria": 0.5,
@@ -54,7 +57,7 @@ class TestApp(unittest.TestCase):
 
     def test_criar_investidor(self):
         # Teste para a rota POST /investidores
-        response = self.app.post('/investidores', json={
+        response = self.client.post('/investidores', json={
             "nome": "João Silva",
             "email": "joao@email.com"
         })
@@ -64,7 +67,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(data["email"], "joao@email.com")
 
         # Teste para evitar duplicação de e-mail
-        response = self.app.post('/investidores', json={
+        response = self.client.post('/investidores', json={
             "nome": "João Silva",
             "email": "joao@email.com"
         })
@@ -73,7 +76,7 @@ class TestApp(unittest.TestCase):
 
     def test_criar_investimento(self):
         # Cria uma moeda e um investidor para associar ao investimento
-        with app.app_context():
+        with self.app.app_context():
             moeda = Moeda(nome="Dólar Americano", tipo="USD")
             investidor = Investidor(nome="João Silva", email="joao@email.com")
             db.session.add(moeda)
@@ -81,7 +84,7 @@ class TestApp(unittest.TestCase):
             db.session.commit()
 
             # Teste para a rota POST /investimentos
-            response = self.app.post('/investimentos', json={
+            response = self.client.post('/investimentos', json={
                 "valor_inicial": 10000,
                 "meses": 12,
                 "taxa_juros": 5.5,
@@ -99,7 +102,8 @@ class TestApp(unittest.TestCase):
     # Testes para Consultas
     def test_listar_moedas(self):
         # Cria duas moedas para testar a listagem
-        with app.app_context():
+        with self.app.app_context():
+            
             moeda1 = Moeda(nome="Dólar Americano", tipo="USD")
             moeda2 = Moeda(nome="Euro", tipo="EUR")
             db.session.add(moeda1)
@@ -107,7 +111,7 @@ class TestApp(unittest.TestCase):
             db.session.commit()
 
             # Teste para a rota GET /moedas
-            response = self.app.get('/moedas')
+            response = self.client.get('/moedas')
             self.assertEqual(response.status_code, 200)
             data = response.get_json()
             self.assertEqual(len(data), 2)
@@ -116,7 +120,7 @@ class TestApp(unittest.TestCase):
 
     def test_listar_taxas_cambio_recentes(self):
         # Cria uma moeda e taxas de câmbio para testar a listagem
-        with app.app_context():
+        with self.app.app_context():
             moeda = Moeda(nome="Dólar Americano", tipo="USD")
             db.session.add(moeda)
             db.session.commit()
@@ -138,7 +142,7 @@ class TestApp(unittest.TestCase):
             db.session.commit()
 
             # Teste para a rota GET /taxas-cambio/recentes
-            response = self.app.get('/taxas-cambio/recentes')
+            response = self.client.get('/taxas-cambio/recentes')
             self.assertEqual(response.status_code, 200)
             data = response.get_json()
             self.assertEqual(len(data), 1)  # Apenas a taxa dos últimos 7 dias deve ser retornada
@@ -148,7 +152,8 @@ class TestApp(unittest.TestCase):
     # Testes para Atualização de Dados
     def test_atualizar_taxa_cambio(self):
         # Cria uma moeda e uma taxa de câmbio para testar a atualização
-        with app.app_context():
+        with self.app.app_context():
+
             moeda = Moeda(nome="Dólar Americano", tipo="USD")
             db.session.add(moeda)
             db.session.commit()
@@ -163,7 +168,7 @@ class TestApp(unittest.TestCase):
             db.session.commit()
 
             # Teste para a rota PUT /taxas-cambio/{id}
-            response = self.app.put(f'/taxas-cambio/{taxa.id}', json={
+            response = self.client.put(f'/taxas-cambio/{taxa.id}', json={
                 "variacao_diaria": 0.8,
                 "taxa_diaria": 5.30
             })
